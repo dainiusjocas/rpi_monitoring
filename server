@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# Author: Dainius Jocas
+
+# Server. It listens to port 34567 and when it receives data it stores it in the database 'monitor.db'
+
+# Import socket module
+import socket
+import sys
+import sqlite3 as lite
+
+def store_data(data):
+    con = None
+    try:
+        con = lite.connect('monitor.db')
+	with con:
+        	cur = con.cursor()
+        	#cur.execute("CREATE TABLE if not exists rpi(piID INT, piHostname TEXT, piActivity TEXT, piCPULoad TEXT, piGateway TEXT, piStorageState TEXT, piIP TEXT, piNetmask TEXT, piProcesses TEXT, piCluster TEXT, piNetworkLoad TEXT, piDNS TEXT)")
+        	query = "INSERT INTO rpi VALUES ('" + data['piID'] + "', '" + data['piHostname'] + "', '" + data['piActivity'] + "', '" + data['piCPULoad'] + "', '" + data['piGateway'] + "', '" + data['piStorageState'] + "', '" + data['piIP'] + "', '" + data['piNetmask'] + "', \"" + data['piProcesses'] + "\", '" + data['piCluster'] + "', '" + data['piNetworkLoad'] + "', '" + data['piDNS'] + "');"
+        	#print query
+        	cur.execute(query)
+		cur.execute('SELECT * from rpi')
+        	print cur.fetchone() 
+    except lite.Error, e:
+        print "Error %s:" % e.args[0]
+        sys.exit(1)
+
+    finally:
+        if con:
+            con.close()    
+
+def parse_data(data):
+    params = {data[0].split(':')[2].split('=')[0].split('.')[0]: data[0].split("\"")[1]}
+    params[data[1].split(':')[2].split('=')[0].split('.')[0]] = data[1].split("\"")[1]
+    params[data[2].split(':')[2].split('=')[0].split('.')[0]] = data[2].split("\"")[1]
+    params[data[3].split(':')[2].split('=')[0].split('.')[0]] = data[3].split("\"")[1]
+    params[data[4].split(':')[2].split('=')[0].split('.')[0]] = data[4].split("\"")[1]
+    params[data[5].split(':')[2].split('=')[0].split('.')[0]] = data[5].split("\"")[1]
+    params[data[6].split(':')[2].split('=')[0].split('.')[0]] = data[6].split("\"")[1]
+    params[data[7].split(':')[2].split('=')[0].split('.')[0]] = data[7].split("\"")[1]
+    params[data[8].split(':')[2].split('=')[0].split('.')[0]] = data[8].split("\"")[1]
+    params[data[9].split(':')[2].split('=')[0].split('.')[0]] = data[9].split("\"")[1]
+    params[data[10].split(':')[2].split('=')[0].split('.')[0]] = data[10].split("\"")[1]
+    params[data[11].split(':')[2].split('=')[0].split('.')[0]] = data[11].split("\"")[1]
+    return params
+
+# Create a UDP server socket
+serverSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+# Bind the socket to server address and server port
+serverSocket.bind( ('', 34567) )
+# Server should be up and running and listening to the incoming connections
+while True:
+	print 'Ready to serve...'
+	# Set up a new connection from the client
+	#connectionSocket, addr = serverSocket.accept()
+	# Receives the request message from the client
+	sentence, (addr, port) = serverSocket.recvfrom(4096)
+        data = parse_data(sentence.split('\n'))
+	#print sentence.split('\n')[0].split(':')[2].split('=')[0].split('.')[0]
+	#print data
+        store_data(data)
+	# Close the client connection socket
+	#connectionSocket.close()

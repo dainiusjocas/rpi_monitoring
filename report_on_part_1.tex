@@ -1,0 +1,149 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{glossaries}
+\makeglossaries
+\usepackage[xindy]{imakeidx}
+%%\makeindex
+
+%%----------------------------------------------------------------------------------------
+
+\newglossaryentry{monitor}
+{
+  name=monitor,
+  description={RPi which monitors agents. Also, this machine can be called  ''server`}
+}
+
+\newglossaryentry{agent}
+{
+  name=agent,
+  description={RPi which is being monitored. Also, this machine can be called ''client``}
+}
+
+\newglossaryentry{snmp}
+{
+  name=SNMP,
+  description={Simple Network Management Protocol \footnote{\url{http://en.wikipedia.org/wiki/Simple_Network_Management_Protocol}}}
+}
+
+\newglossaryentry{mib}
+{
+  name=MIB,
+  description={Management Information Base\footnote{\url{http://en.wikipedia.org/wiki/Management_information_base}}}
+}
+
+%%--------------------------------------------------------------------------------------------
+
+\title{RPI monitoring. Part 1}
+\author{Dainius Jocas}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section{Introduction}
+
+This document describes how to deploy Raspberry Pi (RPi) cluster monitoring software.
+
+\subsection{Scripts Used}
+
+\begin{itemize}
+  \item server\_jocas.py -- this script should be put on a \gls{monitor} (server).
+  \item client\_1\_jocas.py -- to be deployed on the \gls{agent} (client).
+  \item client\_2\_jocas.py -- to be deployed on the agent (client).
+  \item DJ-MIB.py -- \gls{snmp} helper script. To be deployed on the agent (client).
+  \item DJ-MIB -- custom \gls{mib} descriptor. To be deployed on the agent. 
+\end{itemize}
+\section{Deployment of scripts}
+
+In this section guidelines (and not step by step instructions) will be provided. Note that no description how to get/generate actual code is given.
+
+\subsection{Assumptions}
+
+Agent knows address and the port of the monitor.
+
+\subsection{On the monitor side}
+
+So far monitor is super trivial -- all the information it receives script just forwards to the standard output. To run the server start server\_ jocas.py script.
+
+\subsection{On the agent  side}
+
+Steps to get project running:
+\begin{enumerate}
+  \item On the agent machine SNMP should be properly configured (lots of tricky work). 
+  \item DJ-MIB should be deployed in one of the default directories for MIB. Check which are the directories can be done using command 
+  \begin{verbatim}
+  # net-snmp-config --default-mibdirs 
+  \end{verbatim}
+  \item Then remove snmpd program from startup programs. 
+  \item Having root permissions startup client\_1\_jocas.py script.
+  \item Start client\_2\_jocas.py script with proper parameters, e.g.
+  \begin{verbatim}
+  # python client_2_jocas.py [hostname] [port] [timeout in seconds]
+  \end{verbatim}
+\end{enumerate}
+
+Thats it. If everything is OK monitor should receive reports on the state of the agent.  
+
+
+\addcontentsline{toc}{subsection}{Glossary}
+\printglossaries
+
+
+\section{Part 2}
+
+Here second part of the project will be described.
+
+\subsection{Database}
+
+To store data about RPis we decided to use SQLite database. It is because SQLite is very lightweight but at the same time it provides basic SQL functionality.
+
+In the monitor install SQLite DBMS and python connector:
+\begin{verbatim}
+# apt-get install sqlite
+# apt-get install python-sqlite
+\end{verbatim}
+
+Create database file:
+\begin{verbatim}
+# sqlite3 monitor.db
+sqlite> .tables
+\end{verbatim}
+It will be created in the same directory.
+
+Create a table rpi in the database run script create\_table.py:
+\begin{verbatim}
+# python create_table.py
+\end{verbatim}
+
+Columns of table rip are: \{ piID piHostname piActivity piCPULoad piGateway piStorageState piIP   piNetmask piProcesses piCluster piNetworkLoad  piDNS\}. Names of the columns are taken from DJ-MIB.
+
+\subsection{Sequence to be up and running}
+
+\begin{enumerate}
+  \item run SNMP agent
+  \item prepare file with list of monitors (put accurate IPs there)
+  \item prepare databases in monitors
+  \item make sure that the server is up and running
+  \item start client\_strategy\_jocas script
+  \item enjoy the show.
+\end{enumerate}
+
+\subsection{Some open issues}
+
+\begin{enumerate}
+  \item what about those bad fields like "cluster" because it is impossible to get them?
+  \item How to define what is going on in the RPI?
+  \item What would be optimal DB structure?
+  \item where should DB be located?
+  \item monitoring part? how to get data from all monitors?
+\end{enumerate}
+
+
+\end{document}  
