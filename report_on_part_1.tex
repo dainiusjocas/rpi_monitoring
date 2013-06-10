@@ -135,6 +135,36 @@ Columns of table rip are: \{ piID piHostname piActivity piCPULoad piGateway piSt
   \item enjoy the show.
 \end{enumerate}
 
+\subsection{Display the data}
+
+To display the data we used php technology. In order to use this following packages are needed:
+\begin{verbatim}
+#apt-get install apache2
+#apt-get install libapache2-mod-php5
+#apt-get install php5-sqlite
+\end{verbatim}
+
+After installing the packages, in the folder /var/www create one folder i.e. /db and copy inside our *.db file (in our case is monitor.db).
+
+Note: if you can't copy the file, or if you can't create the directory, make sure that you have permissions.
+
+Before going further make sure that apache server is running correctly:
+\begin{verbatim}
+#/etc/init.d/apache2 status
+\end{verbatim}
+
+If apache is not running, try to restart it. If you face the same problem then probably you have some conflicting process already running.
+
+
+Copy the following files into the /var/www directory :
+\begin{itemize}
+  \item display.php
+  \item displayAll.php
+  \item displaySpecific.php
+\end{itemize}
+Now we start the browser and locate to http://localhost/display.php 
+
+
 \subsection{Some open issues}
 
 \begin{enumerate}
@@ -144,6 +174,5 @@ Columns of table rip are: \{ piID piHostname piActivity piCPULoad piGateway piSt
   \item where should DB be located?
   \item monitoring part? how to get data from all monitors?
 \end{enumerate}
-
 
 \end{document}  
