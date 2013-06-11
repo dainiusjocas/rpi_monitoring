@@ -41,8 +41,8 @@
 
 %%--------------------------------------------------------------------------------------------
 
-\title{RPI monitoring. Part 1}
-\author{Dainius Jocas}
+\title{RPI monitoring. Part 2}
+\author{Luka Rescic, Dainius Jocas}
 %\date{}							% Activate to display a given date or no date
 
 \begin{document}
@@ -59,6 +59,7 @@ This document describes how to deploy Raspberry Pi (RPi) cluster monitoring soft
   \item client\_2\_jocas.py -- to be deployed on the agent (client).
   \item DJ-MIB.py -- \gls{snmp} helper script. To be deployed on the agent (client).
   \item DJ-MIB -- custom \gls{mib} descriptor. To be deployed on the agent. 
+  \item client\_strategy\_jocas.py -- script that chooses the monitor for the agent.
 \end{itemize}
 \section{Deployment of scripts}
 
